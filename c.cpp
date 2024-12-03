@@ -83,7 +83,7 @@ int main() {
     inputFile.close();
 
     // Output the results
-    cout << "Total safe reports with Problem Dampener: " << safeCount << endl;
+    cout << "Total safe reports with Problem Dampenerrrr: " << safeCount << endl;
 
     return 0;
 }
