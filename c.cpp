@@ -1,89 +1,59 @@
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <vector>
 #include <string>
-#include <cmath> // For abs()
 
 using namespace std;
 
-// Function to check if a report is safe
-bool isSafe(const vector<int>& levels) {
-    if (levels.size() < 2) return false;
+// Function to check if an "X-MAS" exists starting at (row, col)
+bool checkXMAS(const vector<string>& grid, int row, int col) {
+    int rows = grid.size();
+    int cols = grid[0].size();
 
-    bool increasing = true, decreasing = true;
+    // Check bounds for the X shape
+    if (row - 1 < 0 || row + 1 >= rows || col - 1 < 0 || col + 1 >= cols)
+        return false;
 
-    for (size_t i = 1; i < levels.size(); ++i) {
-        int diff = levels[i] - levels[i - 1];
-
-        // Check if the difference is out of the acceptable range
-        if (abs(diff) < 1 || abs(diff) > 3) {
-            return false;
-        }
-
-        // Check if not strictly increasing or decreasing
-        if (diff < 0) increasing = false;
-        if (diff > 0) decreasing = false;
-    }
-
-    // Return true only if all levels are either increasing or decreasing
-    return increasing || decreasing;
+    // Check the X-MAS pattern in both orientations
+    return ((grid[row - 1][col - 1] == 'M' && grid[row][col] == 'A' && grid[row + 1][col + 1] == 'S' &&
+             grid[row - 1][col + 1] == 'M' && grid[row + 1][col - 1] == 'S') ||
+            (grid[row - 1][col - 1] == 'S' && grid[row][col] == 'A' && grid[row + 1][col + 1] == 'M' &&
+             grid[row - 1][col + 1] == 'S' && grid[row + 1][col - 1] == 'M'));
 }
 
-// Function to check if a report is safe with the Problem Dampener
-bool isSafeWithDampener(const vector<int>& levels) {
-    if (isSafe(levels)) return true; // If already safe, no need to remove a level
+// Function to count all occurrences of "X-MAS" in the grid
+int countXMAS(const vector<string>& grid) {
+    int count = 0;
+    int rows = grid.size();
+    int cols = grid[0].size();
 
-    for (size_t i = 0; i < levels.size(); ++i) {
-        vector<int> modifiedLevels;
-        for (size_t j = 0; j < levels.size(); ++j) {
-            if (j != i) {
-                modifiedLevels.push_back(levels[j]);
+    for (int row = 0; row < rows; ++row) {
+        for (int col = 0; col < cols; ++col) {
+            if (checkXMAS(grid, row, col)) {
+                ++count;
             }
-        }
-        if (isSafe(modifiedLevels)) {
-            return true; // Safe after removing one level
         }
     }
 
-    return false; // Not safe even with the Problem Dampener
+    return count;
 }
 
 int main() {
-    // File path to read the data from
-    string filePath = "data.txt";
-    ifstream inputFile(filePath);
-
-    if (!inputFile.is_open()) {
-        cerr << "Error: Could not open the file " << filePath << endl;
+    ifstream inputFile("data.txt");
+    if (!inputFile) {
+        cerr << "Error: Unable to open file data.txt" << endl;
         return 1;
     }
 
+    vector<string> grid;
     string line;
-    int safeCount = 0;
-    vector<vector<int>> reports;
-
-    // Read each line and process the levels
     while (getline(inputFile, line)) {
-        istringstream iss(line);
-        vector<int> levels;
-        int num;
-
-        while (iss >> num) {
-            levels.push_back(num);
-        }
-
-        if (isSafeWithDampener(levels)) {
-            ++safeCount;
-        }
-
-        reports.push_back(levels);
+        grid.push_back(line);
     }
-
     inputFile.close();
 
-    // Output the results
-    cout << "Total safe reports with Problem Dampenerrrr: " << safeCount << endl;
+    int totalOccurrences = countXMAS(grid);
+    cout << "Total occurrences of \"X-MAS\": " << totalOccurrences << endl;
 
     return 0;
 }
