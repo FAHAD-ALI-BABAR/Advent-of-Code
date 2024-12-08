@@ -1,90 +1,54 @@
 #include <iostream>
-#include <fstream>
-#include <sstream>
+#include <map>
 #include <vector>
-#include <string>
-#include <functional>
+#include <utility>
 #include <cmath>
 using namespace std;
 
-// Function to evaluate an expression left-to-right
-int evaluateLeftToRight(const vector<int>& numbers, const vector<char>& operators) {
-    int result = numbers[0];
-    for (size_t i = 0; i < operators.size(); ++i) {
-        if (operators[i] == '+') {
-            result += numbers[i + 1];
-        } else if (operators[i] == '*') {
-            result *= numbers[i + 1];
-        }
-    }
-    return result;
-}
-
-// Recursive function to generate all operator combinations
-bool canAchieveTarget(const vector<int>& numbers, int target, vector<char>& currentOperators) {
-    if (currentOperators.size() == numbers.size() - 1) {
-        // Evaluate the expression with the current operator combination
-        int result = evaluateLeftToRight(numbers, currentOperators);
-        return result == target;
-    }
-
-    // Try adding '+' operator
-    currentOperators.push_back('+');
-    if (canAchieveTarget(numbers, target, currentOperators)) {
-        return true;
-    }
-    currentOperators.pop_back();
-
-    // Try adding '*' operator
-    currentOperators.push_back('*');
-    if (canAchieveTarget(numbers, target, currentOperators)) {
-        return true;
-    }
-    currentOperators.pop_back();
-
-    return false;
-}
-
 int main() {
-    ifstream input("data.txt");
-    if (!input) {
-        cerr << "Error: Could not open data.txt" << endl;
-        return 1;
+    map<char, vector<pair<int, int>>> antennas;
+    int rows, cols;
+    cin >> rows >> cols;
+    vector<string> grid(rows);
+
+    // Reading the grid
+    for (int i = 0; i < rows; i++) {
+        cin >> grid[i];
     }
 
-    string line;
-    int totalCalibrationResult = 0;
-
-    while (getline(input, line)) {
-        stringstream ss(line);
-        int target;
-        char colon;
-        vector<int> numbers;
-
-        // Parse target and numbers
-        ss >> target >> colon;
-        int num;
-        while (ss >> num) {
-            numbers.push_back(num);
+    // Parse antennas
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            char ch = grid[i][j];
+            if (isalnum(ch)) {
+                antennas[ch].emplace_back(i, j);
+            }
         }
-
-        if (numbers.empty()) {
-            continue; // Skip lines with no numbers
-        }
-
-        // Debug output
-        cout << "Processing: Target = " << target << ", Numbers = ";
-        for (int n : numbers) cout << n << " ";
-        cout << endl;
-
-        // Check if the target can be achieved
-        vector<char> operators;
-       
     }
 
-    input.close();
+    // Find antinodes
+    map<pair<int, int>, bool> antinodes;
+    for (const auto& entry : antennas) {
+        const auto& positions = entry.second;
+        int size = positions.size();
+        for (int i = 0; i < size; i++) {
+            for (int j = i + 1; j < size; j++) {
+                auto pos1 = positions[i];
+                auto pos2 = positions[j];
+                int x1 = pos1.first, y1 = pos1.second;
+                int x2 = pos2.first, y2 = pos2.second;
 
-    cout << "Total calibration result: " << totalCalibrationResult << endl;
+                int mx = (x1 + x2) / 2;
+                int my = (y1 + y2) / 2;
 
+                // Ensure midpoint is integer
+                if ((x1 + x2) % 2 == 0 && (y1 + y2) % 2 == 0) {
+                    antinodes[{mx, my}] = true;
+                }
+            }
+        }
+    }
+
+    cout << "Total unique antinode locations: " << antinodes.size() << endl;
     return 0;
 }
