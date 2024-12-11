@@ -46,4 +46,4 @@ for freq, positions in antenna_positions.items():
                         antinode_locations.add((mid_x, y1))
 
 # Print the total number of unique antinode locations
-print("Total Number of Unique Antinodesssssss:", len(antinode_locations))
+print("Total Number of Unique Antinodessss:", len(antinode_locations))
